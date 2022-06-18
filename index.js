@@ -1,20 +1,48 @@
 import dotenv from 'dotenv';
 import fetch from 'node-fetch';
+import Fastify from 'fastify';
 
 dotenv.config();
+const fastify = Fastify({
+    logger: true
+})
 
 const sendyDefaults = {
     api_key: process.env.SENDY_API_KEY,
     list: process.env.SENDY_LIST
 }
 
-const callRevueAPI = async (endpoint) => {
+fastify.post('/sendy-webhook', async function (request, reply) {
+    const data = request.body;
+    if (!data.trigger || !data.email) {
+        throw new Error('Invalid data')
+    }
+
+    const {trigger, email} = data;
+    if (['subscribe', 'unsubscribe'].includes(trigger)) {
+        const url = `subscribers${trigger === 'unsubscribe' ? '/unsubscribe' : ''}`;
+        const status = await callRevueAPI(url, 'POST', convertToFormData({email}))
+        return reply.send(status);
+    }
+
+    throw new Error('Trigger not found')
+})
+
+fastify.listen({port: 3000}, function (err, address) {
+    if (err) {
+        fastify.log.error(err)
+        process.exit(1)
+    }
+})
+
+const callRevueAPI = async (endpoint, method = 'GET', body) => {
     const response = await fetch(`https://www.getrevue.co/api/v2/${endpoint}`, {
         headers: {
             Authorization: `Token ${process.env.REVUE_API_TOKEN}`,
-            'Content-Type': 'application/json',
+            'Content-Type': body ? 'application/x-www-form-urlencoded' : 'application/json',
         },
-        method: 'GET',
+        method,
+        body,
     }).then((res) => res.json());
     return response;
 }
