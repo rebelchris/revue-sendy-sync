@@ -71,7 +71,7 @@ const convertToFormData = (data) => {
     return formData;
 }
 
-cron.schedule('0 2 * * *', () => {
+cron.schedule('0 2 * * *', async () => {
     const revueUnsubscribed = await callRevueAPI('subscribers/unsubscribed');
 
     for (const unsubscriber of revueUnsubscribed) {
