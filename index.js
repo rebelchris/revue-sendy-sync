@@ -20,9 +20,10 @@ fastify.post('/sendy-webhook', async function (request, reply) {
 
     const {trigger, email} = data;
     if (['subscribe', 'unsubscribe'].includes(trigger)) {
-        const url = `subscribers${trigger === 'unsubscribe' ? '/unsubscribe' : ''}`;
-        const status = await callRevueAPI(url, 'POST', convertToFormData({email}))
-        return reply.send(status);
+        return reply.send({message: 'it works', trigger})
+        // const url = `subscribers${trigger === 'unsubscribe' ? '/unsubscribe' : ''}`;
+        // const status = await callRevueAPI(url, 'POST', convertToFormData({email}))
+        // return reply.send(status);
     }
 
     throw new Error('Trigger not found')
@@ -67,23 +68,24 @@ const convertToFormData = (data) => {
 }
 
 (async () => {
-    const revueUnsubscribed = await callRevueAPI('subscribers/unsubscribed');
-
-    for (const unsubscriber of revueUnsubscribed) {
-        const unsubscribeSendy = await callSendyAPI('/unsubscribe', convertToFormData({
-            ...sendyDefaults,
-            email: unsubscriber.email
-        }))
-        console.log(unsubscribeSendy);
-    }
-
-    const revueSubscribed = await callRevueAPI('subscribers');
-    for (const subscriber of revueSubscribed) {
-        const subscribeSendy = await callSendyAPI('/subscribe', convertToFormData({
-            ...sendyDefaults,
-            email: subscriber.email,
-            silent: true,
-        }))
-        console.log(subscribeSendy);
-    }
+    console.log('recurring script started')
+    // const revueUnsubscribed = await callRevueAPI('subscribers/unsubscribed');
+    //
+    // for (const unsubscriber of revueUnsubscribed) {
+    //     const unsubscribeSendy = await callSendyAPI('/unsubscribe', convertToFormData({
+    //         ...sendyDefaults,
+    //         email: unsubscriber.email
+    //     }))
+    //     console.log(unsubscribeSendy);
+    // }
+    //
+    // const revueSubscribed = await callRevueAPI('subscribers');
+    // for (const subscriber of revueSubscribed) {
+    //     const subscribeSendy = await callSendyAPI('/subscribe', convertToFormData({
+    //         ...sendyDefaults,
+    //         email: subscriber.email,
+    //         silent: true,
+    //     }))
+    //     console.log(subscribeSendy);
+    // }
 })();
