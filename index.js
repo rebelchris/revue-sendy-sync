@@ -12,6 +12,10 @@ const sendyDefaults = {
     list: process.env.SENDY_LIST
 }
 
+fastify.get('/', function(request, reply) {
+    reply.send({welcome:'You found my hidden project 🤯'});
+})
+
 fastify.post('/sendy-webhook', async function (request, reply) {
     const data = request.body;
     if (!data.trigger || !data.email) {
